@@ -1,0 +1,4 @@
+gradio 
+timm
+torch
+torchvision
