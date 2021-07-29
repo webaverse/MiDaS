@@ -2,3 +2,4 @@ gradio
 timm
 torch
 torchvision
+opencv-python-headless
