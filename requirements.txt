@@ -3,3 +3,5 @@ timm
 torch
 torchvision
 opencv-python-headless
+numpy
+Pillow
