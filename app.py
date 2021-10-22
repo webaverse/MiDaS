@@ -7,7 +7,7 @@ from PIL import Image
 torch.hub.download_url_to_file('https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f', 'turtle.jpg')
 torch.hub.download_url_to_file('https://images.unsplash.com/photo-1519066629447-267fffa62d4b', 'lions.jpg')
 
-midas = torch.hub.load("intel-isl/MiDaS:main", "MiDaS")
+midas = torch.hub.load("intel-isl/MiDaS", "MiDaS")
 
 use_large_model = True
 
