@@ -107,7 +107,17 @@ def depth2():
         # return flask.Response(status=500)
 
 # listen on 0.0.0.0:80
-app.run(host='0.0.0.0', port=80)
+if __name__ == "__main__":
+    print("Starting server...")
+    app.run(
+        host="0.0.0.0",
+        port=80,
+        debug=False,
+        # dev_tools_silence_routes_logging = False,
+        # dev_tools_ui=True,
+        # dev_tools_hot_reload=True,
+        threaded=True,
+    )
 
 # inputs =  gr.inputs.Image(type='pil', label="Original Image")
 # outputs = gr.outputs.Image(type="pil",label="Output Image")
