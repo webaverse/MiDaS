@@ -4,6 +4,6 @@ torchvision
 opencv-python-headless
 numpy
 Pillow
-gradio
-opencv-python
+jupyter-core
 flask
+opencv-python
