@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from PIL import Image
 import flask
-from flask import request
+from flask import request, make_response
 import io
 
 torch.hub.download_url_to_file('https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f', 'turtle.jpg')
@@ -87,7 +87,7 @@ def depth2():
         img = Image.fromarray(formatted)
         # respond with the image data to the web page
         # use cors headers
-        response = flask.make_response(img.tobytes())
+        response = make_response(img.tobytes())
         response.headers.set('Access-Control-Allow-Origin', '*')
         response.headers.set('Access-Control-Allow-Methods', '*')
         response.headers.set('Access-Control-Allow-Headers', '*')
@@ -99,7 +99,7 @@ def depth2():
     except Exception as e:
         print(e)
         # respond to the client with the error
-        response = flask.make_response(str(e))
+        response = make_response(str(e))
         response.headers.set('Access-Control-Allow-Origin', '*')
         response.headers.set('Access-Control-Allow-Methods', '*')
         response.headers.set('Access-Control-Allow-Headers', '*')
