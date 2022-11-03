@@ -101,7 +101,13 @@ def depth2():
     # return flask.send_file(img, mimetype='image/png')
   except Exception as e:
     print(e)
-    return flask.Response(status=500)
+    # respond to the client with the error
+    response = flask.make_response(str(e))
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', '*')
+    response.headers.set('Access-Control-Allow-Headers', '*')
+    return response
+    # return flask.Response(status=500)
 
 # listen on 0.0.0.0:8080
 app.run(host='0.0.0.0', port=80)
