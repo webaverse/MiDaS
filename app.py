@@ -60,4 +60,4 @@ examples = [
     ["lions.jpg"]
 ]
 
-gr.Interface(depth, inputs, outputs, title=title, description=description, article=article, examples=examples, analytics_enabled=False).launch(enable_queue=True,cache_examples=True)
+gr.Interface(depth, inputs, outputs, title=title, description=description, article=article, examples=examples, analytics_enabled=False).launch(enable_queue=True)
