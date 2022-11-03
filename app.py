@@ -85,9 +85,12 @@ def depth2():
         output = prediction.cpu().numpy()
         formatted = (output * 255 / np.max(output)).astype('uint8')
         img = Image.fromarray(formatted)
-        # respond with the image data to the web page
-        # use cors headers
-        response = make_response(img.tobytes())
+        # get the png of the image
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format="PNG")
+        img_bytes = img_bytes.getvalue()
+        # respond with the png
+        response = make_response(img_bytes, 200)
         response.headers.set('Content-Type', 'image/png')
         response.headers.set('Access-Control-Allow-Origin', '*')
         response.headers.set('Access-Control-Allow-Methods', '*')
