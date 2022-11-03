@@ -1,6 +1,6 @@
 import cv2
 import torch
-import gradio as gr
+# import gradio as gr
 import numpy as np
 from PIL import Image
 import flask
@@ -41,7 +41,7 @@ def depth(img):
         mode="bicubic",
         align_corners=False,
     ).squeeze()
-    
+
   output = prediction.cpu().numpy()
   formatted = (output * 255 / np.max(output)).astype('uint8')
   img = Image.fromarray(formatted)
@@ -76,16 +76,19 @@ def depth2():
   # respond with the image data to the web page
   return flask.send_file(img, mimetype='image/png')
 
-inputs =  gr.inputs.Image(type='pil', label="Original Image")
-outputs = gr.outputs.Image(type="pil",label="Output Image")
+# listen on 0.0.0.0:8080
+app.run(host='0.0.0.0', port=80)
 
-title = "MiDaS"
-description = "Gradio demo for MiDaS v2.1 which takes in a single image for computing relative depth. To use it, simply upload your image, or click one of the examples to load them. Read more at the links below."
-article = "<p style='text-align: center'><a href='https://arxiv.org/abs/1907.01341v3'>Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer</a> | <a href='https://github.com/intel-isl/MiDaS'>Github Repo</a></p>"
+# inputs =  gr.inputs.Image(type='pil', label="Original Image")
+# outputs = gr.outputs.Image(type="pil",label="Output Image")
 
-examples = [
-    ["turtle.jpg"],
-    ["lions.jpg"]
-]
+# title = "MiDaS"
+# description = "Gradio demo for MiDaS v2.1 which takes in a single image for computing relative depth. To use it, simply upload your image, or click one of the examples to load them. Read more at the links below."
+# article = "<p style='text-align: center'><a href='https://arxiv.org/abs/1907.01341v3'>Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer</a> | <a href='https://github.com/intel-isl/MiDaS'>Github Repo</a></p>"
+
+# examples = [
+#     ["turtle.jpg"],
+#     ["lions.jpg"]
+# ]
 
 # app = gr.Interface(depth, inputs, outputs, title=title, description=description, article=article, examples=examples, analytics_enabled=False).launch(enable_queue=True)
