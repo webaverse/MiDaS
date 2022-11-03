@@ -6,3 +6,4 @@ numpy
 Pillow
 gradio
 opencv-python
+flask

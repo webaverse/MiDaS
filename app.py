@@ -3,6 +3,7 @@ import torch
 import gradio as gr
 import numpy as np
 from PIL import Image
+import flask
 
 torch.hub.download_url_to_file('https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f', 'turtle.jpg')
 torch.hub.download_url_to_file('https://images.unsplash.com/photo-1519066629447-267fffa62d4b', 'lions.jpg')
@@ -26,7 +27,6 @@ if use_large_model:
 else:
     transform = midas_transforms.small_transform
 
-
 def depth(img):
   cv_image = np.array(img) 
   img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
@@ -46,7 +46,35 @@ def depth(img):
   formatted = (output * 255 / np.max(output)).astype('uint8')
   img = Image.fromarray(formatted)
   return img
+
+# start a flask app
+app = flask.Flask(__name__)
+
+# serve the depth endpoint under /depth
+@app.route("/depth", methods=["POST"])
+def depth2():
+  # read the post body
+  body = flask.request.get_data()
+  img = Image.open(io.BytesIO(body))
+  cv_image = np.array(img)
+  img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+
+  input_batch = transform(img).to(device)
+  with torch.no_grad():
+    prediction = midas(input_batch)
+
+    prediction = torch.nn.functional.interpolate(
+        prediction.unsqueeze(1),
+        size=img.shape[:2],
+        mode="bicubic",
+        align_corners=False,
+    ).squeeze()
     
+  output = prediction.cpu().numpy()
+  formatted = (output * 255 / np.max(output)).astype('uint8')
+  img = Image.fromarray(formatted)
+  # respond with the image data to the web page
+  return flask.send_file(img, mimetype='image/png')
 
 inputs =  gr.inputs.Image(type='pil', label="Original Image")
 outputs = gr.outputs.Image(type="pil",label="Output Image")
@@ -60,4 +88,4 @@ examples = [
     ["lions.jpg"]
 ]
 
-gr.Interface(depth, inputs, outputs, title=title, description=description, article=article, examples=examples, analytics_enabled=False).launch(enable_queue=True)
+# app = gr.Interface(depth, inputs, outputs, title=title, description=description, article=article, examples=examples, analytics_enabled=False).launch(enable_queue=True)
