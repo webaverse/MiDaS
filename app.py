@@ -14,9 +14,9 @@ midas = torch.hub.load("intel-isl/MiDaS", "MiDaS")
 use_large_model = True
 
 if use_large_model:
-    midas = torch.hub.load("intel-isl/MiDaS", "MiDaS")
+  midas = torch.hub.load("intel-isl/MiDaS", "MiDaS")
 else:
-    midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small")
+  midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small")
 
 device = "cpu"
 midas.to(device)
@@ -24,9 +24,9 @@ midas.to(device)
 midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
 
 if use_large_model:
-    transform = midas_transforms.default_transform
+  transform = midas_transforms.default_transform
 else:
-    transform = midas_transforms.small_transform
+  transform = midas_transforms.small_transform
 
 def depth(img):
   cv_image = np.array(img) 
@@ -51,44 +51,10 @@ def depth(img):
 # start a flask app
 app = flask.Flask(__name__)
 
-# serve all OPTIONS requests
+# serve all OPTIONS requests for all paths
 @app.route('/<path:path>', methods=['OPTIONS'])
 def options(path):
-    response = flask.make_response()
-    response.headers.set('Access-Control-Allow-Origin', '*')
-    response.headers.set('Access-Control-Allow-Methods', '*')
-    response.headers.set('Access-Control-Allow-Headers', '*')
-    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
-    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
-    response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
-    return response
-
-# serve the depth endpoint under /depth
-@app.route("/depth", methods=["POST"])
-def depth2():
-  # read the post body
-  body = flask.request.get_data()
-  img = Image.open(io.BytesIO(body))
-  cv_image = np.array(img)
-  img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
-
-  input_batch = transform(img).to(device)
-  with torch.no_grad():
-    prediction = midas(input_batch)
-
-    prediction = torch.nn.functional.interpolate(
-        prediction.unsqueeze(1),
-        size=img.shape[:2],
-        mode="bicubic",
-        align_corners=False,
-    ).squeeze()
-    
-  output = prediction.cpu().numpy()
-  formatted = (output * 255 / np.max(output)).astype('uint8')
-  img = Image.fromarray(formatted)
-  # respond with the image data to the web page
-  # use cors headers
-  response = flask.make_response(img.tobytes())
+  response = flask.Response()
   response.headers.set('Access-Control-Allow-Origin', '*')
   response.headers.set('Access-Control-Allow-Methods', '*')
   response.headers.set('Access-Control-Allow-Headers', '*')
@@ -96,7 +62,46 @@ def depth2():
   response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
   return response
-  # return flask.send_file(img, mimetype='image/png')
+
+# serve the depth endpoint under /depth
+@app.route("/depth", methods=["POST"])
+def depth2():
+  # catch errors and respond with 500
+  try:
+    # read the post body
+    body = flask.request.get_data()
+    img = Image.open(io.BytesIO(body))
+    cv_image = np.array(img)
+    img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+
+    input_batch = transform(img).to(device)
+    with torch.no_grad():
+        prediction = midas(input_batch)
+
+        prediction = torch.nn.functional.interpolate(
+            prediction.unsqueeze(1),
+            size=img.shape[:2],
+            mode="bicubic",
+            align_corners=False,
+        ).squeeze()
+        
+    output = prediction.cpu().numpy()
+    formatted = (output * 255 / np.max(output)).astype('uint8')
+    img = Image.fromarray(formatted)
+    # respond with the image data to the web page
+    # use cors headers
+    response = flask.make_response(img.tobytes())
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', '*')
+    response.headers.set('Access-Control-Allow-Headers', '*')
+    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+    response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+    return response
+    # return flask.send_file(img, mimetype='image/png')
+  except Exception as e:
+    print(e)
+    return flask.Response(status=500)
 
 # listen on 0.0.0.0:8080
 app.run(host='0.0.0.0', port=80)
