@@ -88,6 +88,7 @@ def depth2():
         # respond with the image data to the web page
         # use cors headers
         response = make_response(img.tobytes())
+        response.headers.set('Content-Type', 'image/png')
         response.headers.set('Access-Control-Allow-Origin', '*')
         response.headers.set('Access-Control-Allow-Methods', '*')
         response.headers.set('Access-Control-Allow-Headers', '*')
