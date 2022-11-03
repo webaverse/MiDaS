@@ -51,6 +51,18 @@ def depth(img):
 # start a flask app
 app = flask.Flask(__name__)
 
+# serve all OPTIONS requests
+@app.route('/<path:path>', methods=['OPTIONS'])
+def options(path):
+    response = flask.make_response()
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', '*')
+    response.headers.set('Access-Control-Allow-Headers', '*')
+    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+    response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+    return response
+
 # serve the depth endpoint under /depth
 @app.route("/depth", methods=["POST"])
 def depth2():
@@ -77,8 +89,9 @@ def depth2():
   # respond with the image data to the web page
   # use cors headers
   response = flask.make_response(img.tobytes())
-  response.headers.set('Content-Type', 'image/png')
   response.headers.set('Access-Control-Allow-Origin', '*')
+  response.headers.set('Access-Control-Allow-Methods', '*')
+  response.headers.set('Access-Control-Allow-Headers', '*')
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
   response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
