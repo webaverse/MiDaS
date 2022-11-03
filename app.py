@@ -74,7 +74,15 @@ def depth2():
   formatted = (output * 255 / np.max(output)).astype('uint8')
   img = Image.fromarray(formatted)
   # respond with the image data to the web page
-  return flask.send_file(img, mimetype='image/png')
+  # use cors headers
+  response = flask.make_response(img.tobytes())
+  response.headers.set('Content-Type', 'image/png')
+  response.headers.set('Access-Control-Allow-Origin', '*')
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+  response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+  return response
+  # return flask.send_file(img, mimetype='image/png')
 
 # listen on 0.0.0.0:8080
 app.run(host='0.0.0.0', port=80)
