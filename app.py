@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from PIL import Image
 import flask
+from flask import request
 import io
 
 torch.hub.download_url_to_file('https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f', 'turtle.jpg')
@@ -51,66 +52,61 @@ def depth(img):
 # start a flask app
 app = flask.Flask(__name__)
 
-# serve all OPTIONS requests for all paths
-@app.route('/<path:path>', methods=['OPTIONS'])
-def options(path):
-  print('handle options request: ' + path)
-  response = flask.make_response('')
-  response.headers.set('Access-Control-Allow-Origin', '*')
-  response.headers.set('Access-Control-Allow-Methods', '*')
-  response.headers.set('Access-Control-Allow-Headers', '*')
-#   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
-#   response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
-#   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
-  return response
 
 # serve the depth endpoint under /depth
-@app.route("/depth", methods=["POST"])
+@app.route("/depth", methods=["GET", "POST", "OPTIONS"])
 def depth2():
-  # catch errors and respond with 500
-  try:
-    # read the post body
-    body = flask.request.get_data()
-    img = Image.open(io.BytesIO(body))
-    cv_image = np.array(img)
-    img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+    if request.method == "OPTIONS":
+        response = make_response("", 200)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        return response
 
-    input_batch = transform(img).to(device)
-    with torch.no_grad():
-        prediction = midas(input_batch)
+    # catch errors and respond with 500
+    try:
+        # read the post body
+        body = request.get_data()
+        img = Image.open(io.BytesIO(body))
+        cv_image = np.array(img)
+        img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
-        prediction = torch.nn.functional.interpolate(
-            prediction.unsqueeze(1),
-            size=img.shape[:2],
-            mode="bicubic",
-            align_corners=False,
-        ).squeeze()
-        
-    output = prediction.cpu().numpy()
-    formatted = (output * 255 / np.max(output)).astype('uint8')
-    img = Image.fromarray(formatted)
-    # respond with the image data to the web page
-    # use cors headers
-    response = flask.make_response(img.tobytes())
-    response.headers.set('Access-Control-Allow-Origin', '*')
-    response.headers.set('Access-Control-Allow-Methods', '*')
-    response.headers.set('Access-Control-Allow-Headers', '*')
-    # response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
-    # response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
-    # response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
-    return response
-    # return flask.send_file(img, mimetype='image/png')
-  except Exception as e:
-    print(e)
-    # respond to the client with the error
-    response = flask.make_response(str(e))
-    response.headers.set('Access-Control-Allow-Origin', '*')
-    response.headers.set('Access-Control-Allow-Methods', '*')
-    response.headers.set('Access-Control-Allow-Headers', '*')
-    return response
-    # return flask.Response(status=500)
+        input_batch = transform(img).to(device)
+        with torch.no_grad():
+            prediction = midas(input_batch)
 
-# listen on 0.0.0.0:8080
+            prediction = torch.nn.functional.interpolate(
+                prediction.unsqueeze(1),
+                size=img.shape[:2],
+                mode="bicubic",
+                align_corners=False,
+            ).squeeze()
+            
+        output = prediction.cpu().numpy()
+        formatted = (output * 255 / np.max(output)).astype('uint8')
+        img = Image.fromarray(formatted)
+        # respond with the image data to the web page
+        # use cors headers
+        response = flask.make_response(img.tobytes())
+        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', '*')
+        response.headers.set('Access-Control-Allow-Headers', '*')
+        # response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+        # response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+        # response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+        return response
+        # return flask.send_file(img, mimetype='image/png')
+    except Exception as e:
+        print(e)
+        # respond to the client with the error
+        response = flask.make_response(str(e))
+        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', '*')
+        response.headers.set('Access-Control-Allow-Headers', '*')
+        return response
+        # return flask.Response(status=500)
+
+# listen on 0.0.0.0:80
 app.run(host='0.0.0.0', port=80)
 
 # inputs =  gr.inputs.Image(type='pil', label="Original Image")
