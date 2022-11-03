@@ -58,9 +58,9 @@ def options(path):
   response.headers.set('Access-Control-Allow-Origin', '*')
   response.headers.set('Access-Control-Allow-Methods', '*')
   response.headers.set('Access-Control-Allow-Headers', '*')
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
-  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
-  response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+#   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+#   response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+#   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
   return response
 
 # serve the depth endpoint under /depth
@@ -94,9 +94,9 @@ def depth2():
     response.headers.set('Access-Control-Allow-Origin', '*')
     response.headers.set('Access-Control-Allow-Methods', '*')
     response.headers.set('Access-Control-Allow-Headers', '*')
-    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
-    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
-    response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+    # response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+    # response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+    # response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
     return response
     # return flask.send_file(img, mimetype='image/png')
   except Exception as e:
