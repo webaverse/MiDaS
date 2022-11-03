@@ -54,7 +54,8 @@ app = flask.Flask(__name__)
 # serve all OPTIONS requests for all paths
 @app.route('/<path:path>', methods=['OPTIONS'])
 def options(path):
-  response = flask.Response()
+  print('handle options request: ' + path)
+  response = flask.make_response('')
   response.headers.set('Access-Control-Allow-Origin', '*')
   response.headers.set('Access-Control-Allow-Methods', '*')
   response.headers.set('Access-Control-Allow-Headers', '*')
